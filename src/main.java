@@ -19,7 +19,7 @@ public class main {
 	public static void main(String[] args) {
 		try {
 			ServerSocket s = new ServerSocket(PORT);
-			db = API.readFile(".content_types");
+			db = API.readFile(".content_types",false);
 			content_types = TextToHashmap.Convert(db,",",":");
 			while (true) {
 				Socket ss = s.accept();
@@ -41,7 +41,7 @@ public class main {
 						translator(request);
 						if(path.equals("/")) path = DEFAULT_DOCUMENT;
 						if (method.equals("GET")) {
-							String res = API.readFile(path);
+							String res = API.readFile(path,true);
 							System.out.println("Trying to read the file: "+path);
 							String type = content_types.get(path.substring(path.lastIndexOf(".")));
 							API.Network.write(new DataOutputStream(s.getOutputStream()), res, type);

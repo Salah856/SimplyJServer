@@ -39,9 +39,14 @@ public class API {
 		    return result.toString();
 		}
 	}
-	public static String readFile(String filename) throws FileNotFoundException {
+	public static String readFile(String filename,boolean ispublic) throws FileNotFoundException {
         String out = "";
-        File file = new File("./public_html/"+filename);
+        File file = null;
+        if(ispublic) {
+        	file = new File("./public_html/"+filename);
+        }else {
+        	file = new File("./"+filename);
+        }
         Scanner sc = new Scanner(file);
         while (sc.hasNextLine()) {
             out += sc.nextLine();
