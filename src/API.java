@@ -5,6 +5,20 @@ public class API {
 		public static class Network {
 		public static void write(DataOutputStream s, String text) {
 			try {
+				text = "HTTP/1.1 200 OK\r\n"
+						+ "Content-Security-Policy: default-src 'self'\r\n"
+						+ "X-Frame-Options: deny\r\n"
+						+ "X-XSS-Protection: 1; mode=block\r\n"
+						+ "X-Content-Type-Options: nosniff\r\n"
+						+ "Referrer-Policy: origin-when-cross-origin\r\n"
+						+ "Cache-Control: no-store\r\n"
+						+ "Clear-Site-Data: \"*\"\r\n"
+						+ "Feature-Policy: microphone 'none'; camera 'none'\r\n"
+					    + "Server: SimplyJServer\r\n"
+						+ "Content-Length: " + text.length() + "\r\n"
+					    + "Connection: close\r\n"
+						+ "Content-Type: text/html\r\n\r\n"
+					    + text;
 				s.writeUTF(text);
 				s.close();
 			} catch (Exception e) {
@@ -13,21 +27,21 @@ public class API {
 		}
 
 		public static String read(DataInputStream s) {
-			BufferedReader ss = new BufferedReader(new InputStreamReader(s));
-			String out = "";
+		    StringBuilder result = null;
 			try {
-				out = ss.readLine();
-				s.close();
-				ss.close();
+				result = new StringBuilder();
+				do {
+				    result.append((char) s.read());
+				} while (s.available() > 0);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			return out;
+		    return result.toString();
 		}
 	}
 	public static String readFile(String filename) throws FileNotFoundException {
         String out = "";
-        File file = new File("./"+filename);
+        File file = new File("./public_html/"+filename);
         Scanner sc = new Scanner(file);
         while (sc.hasNextLine()) {
             out += sc.nextLine();
@@ -35,7 +49,7 @@ public class API {
         if (out.isEmpty()) {
 			out = "";
 		}
-		System.out.println(out);
+        sc.close();
         return out;
     }
 }

@@ -1,7 +1,16 @@
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class main {
+	static String[] requestsLines;
+    static String[] requestLine;
+    static String method;
+    static String path;
+    static String version;
+    static String host;
+    static List<String> headers = new ArrayList<>();
 	static int PORT = 80;
 	public static void main(String[] args) {
 		try {
@@ -22,20 +31,28 @@ public class main {
 		}
 		public void run() {
 			try {
-				String response = "";
-						// String request = API.Network.read(new DataInputStream(s.getInputStream()));
-						// if (request.contains("GET")) {
-							String res = API.readFile("index.html");
-							response = "HTTP/1.1 200 OK\r\n" + "Server: SimplyJServer\r\n" + "Content-Length: "
-									+ res.length() + "\r\n" + "Connection: close\r\n"
-									+ "Content-Type: text/html\r\n\r\n" + res;
-						// }else {
-						// 	response = "Ok !";
-						// }
-						API.Network.write(new DataOutputStream(s.getOutputStream()), response);
+						String request = API.Network.read(new DataInputStream(s.getInputStream()));
+						translator(request);
+						if(path.equals("/")) path = "index.html";
+						if (method.equals("GET")) {
+						String res = API.readFile(path);
+						API.Network.write(new DataOutputStream(s.getOutputStream()), res);
+						}
 			} catch (Exception e) {
 				
 			}
 		}
+	}
+	public static void translator(String i) {
+		requestsLines = i.split("\r\n");
+        requestLine = requestsLines[0].split(" ");
+        method = requestLine[0];
+        path = requestLine[1];
+        version = requestLine[2];
+        host = requestsLines[1].split(" ")[1];
+        for (int h = 2; h < requestsLines.length; h++) {
+            String header = requestsLines[h];
+            headers.add(header);
+        }
 	}
 }
