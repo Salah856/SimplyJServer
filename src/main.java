@@ -2,6 +2,7 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class main {
 	static String[] requestsLines;
@@ -12,9 +13,14 @@ public class main {
     static String host;
     static List<String> headers = new ArrayList<>();
 	static int PORT = 80;
+	static String db;
+	static String DEFAULT_DOCUMENT = "index.html";
+	static ConcurrentHashMap<String,String> content_types = new ConcurrentHashMap<String,String>();
 	public static void main(String[] args) {
 		try {
 			ServerSocket s = new ServerSocket(PORT);
+			db = API.readFile(".content_types");
+			content_types = TextToHashmap.Convert(db,",",":");
 			while (true) {
 				Socket ss = s.accept();
 				t thread = new t(ss);
@@ -33,10 +39,12 @@ public class main {
 			try {
 						String request = API.Network.read(new DataInputStream(s.getInputStream()));
 						translator(request);
-						if(path.equals("/")) path = "index.html";
+						if(path.equals("/")) path = DEFAULT_DOCUMENT;
 						if (method.equals("GET")) {
-						String res = API.readFile(path);
-						API.Network.write(new DataOutputStream(s.getOutputStream()), res);
+							String res = API.readFile(path);
+							System.out.println("Trying to read the file: "+path);
+							String type = content_types.get(path.substring(path.lastIndexOf(".")));
+							API.Network.write(new DataOutputStream(s.getOutputStream()), res, type);
 						}
 			} catch (Exception e) {
 				

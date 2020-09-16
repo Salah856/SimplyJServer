@@ -3,7 +3,7 @@ import java.util.Scanner;
 
 public class API {
 		public static class Network {
-		public static void write(DataOutputStream s, String text) {
+		public static void write(DataOutputStream s, String text, String content) {
 			try {
 				text = "HTTP/1.1 200 OK\r\n"
 						+ "Content-Security-Policy: default-src 'self'\r\n"
@@ -17,7 +17,7 @@ public class API {
 					    + "Server: SimplyJServer\r\n"
 						+ "Content-Length: " + text.length() + "\r\n"
 					    + "Connection: close\r\n"
-						+ "Content-Type: text/html\r\n\r\n"
+						+ "Content-Type: "+content+"\r\n\r\n"
 					    + text;
 				s.writeUTF(text);
 				s.close();
