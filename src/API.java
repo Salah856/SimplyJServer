@@ -1,31 +1,34 @@
 import java.io.*;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class API {
 		public static class Network {
-		public static void write(DataOutputStream s, String text, String content) {
+		public static void write(DataOutputStream s, byte[] res, String content) {
 			try {
-				text = "HTTP/1.1 200 OK\r\n"
-						+ "Content-Security-Policy: default-src 'self'\r\n"
-						+ "X-Frame-Options: deny\r\n"
-						+ "X-XSS-Protection: 1; mode=block\r\n"
-						+ "X-Content-Type-Options: nosniff\r\n"
-						+ "Referrer-Policy: origin-when-cross-origin\r\n"
-						+ "Cache-Control: no-store\r\n"
-						+ "Clear-Site-Data: \"*\"\r\n"
-						+ "Feature-Policy: microphone 'none'; camera 'none'\r\n"
-					    + "Server: SimplyJServer\r\n"
-						+ "Content-Length: " + text.length() + "\r\n"
-					    + "Connection: close\r\n"
-						+ "Content-Type: "+content+"\r\n\r\n"
-					    + text;
-				s.writeUTF(text);
+				s.write("HTTP/1.1 200 OK\r\n".getBytes());
+				s.write("Content-Security-Policy: default-src 'self'\r\n".getBytes());
+				s.write("X-Frame-Options: deny\r\n".getBytes());
+				s.write("X-XSS-Protection: 1; mode=block\r\n".getBytes());
+				s.write("X-Content-Type-Options: nosniff\r\n".getBytes());
+				s.write("Referrer-Policy: origin-when-cross-origin\r\n".getBytes());
+				s.write("Cache-Control: no-store\r\n".getBytes());
+				s.write("Clear-Site-Data: \"*\"\r\n".getBytes());
+				s.write("Feature-Policy: microphone 'none'; camera 'none'\r\n".getBytes());
+				s.write("Server: SimplyJServer\r\n".getBytes());
+				s.write(("Content-Length: " + res.length + "\r\n").getBytes());
+				s.write("Connection: close\r\n".getBytes());
+				s.write(("Content-Type: "+content+"\r\n\r\n").getBytes());
+				s.write(res);
+				s.flush();
 				s.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-
 		public static String read(DataInputStream s) {
 		    StringBuilder result = null;
 			try {
@@ -39,22 +42,19 @@ public class API {
 		    return result.toString();
 		}
 	}
-	public static String readFile(String filename,boolean ispublic) throws FileNotFoundException {
-        String out = "";
-        File file = null;
+	public static byte[] readFile(String filename,boolean ispublic,boolean binary) throws FileNotFoundException {
+        byte[] out = null;
         if(ispublic) {
-        	file = new File("./public_html/"+filename);
+        	filename = ("./public_html/"+filename);
         }else {
-        	file = new File("./"+filename);
+        	filename = ("./"+filename);
         }
-        Scanner sc = new Scanner(file);
-        while (sc.hasNextLine()) {
-            out += sc.nextLine();
+        try {
+			out = Files.readAllBytes(Paths.get(filename));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-        if (out.isEmpty()) {
-			out = "";
-		}
-        sc.close();
         return out;
     }
 }

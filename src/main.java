@@ -19,7 +19,7 @@ public class main {
 	public static void main(String[] args) {
 		try {
 			ServerSocket s = new ServerSocket(PORT);
-			db = API.readFile(".content_types",false);
+			db = new String(API.readFile(".content_types",false,false));
 			content_types = TextToHashmap.Convert(db,",",":");
 			while (true) {
 				Socket ss = s.accept();
@@ -41,14 +41,29 @@ public class main {
 						translator(request);
 						if(path.equals("/")) path = DEFAULT_DOCUMENT;
 						if (method.equals("GET")) {
-							String res = API.readFile(path,true);
-							System.out.println("Trying to read the file: "+path);
-							String type = content_types.get(path.substring(path.lastIndexOf(".")));
-							API.Network.write(new DataOutputStream(s.getOutputStream()), res, type);
+								byte[] res = null;
+								String type = content_types.get(path.substring(path.lastIndexOf(".")));
+								if(type.contains("text")) {
+								res = API.readFile(path,true,false);
+								if(path.equals(DEFAULT_DOCUMENT) || path.equals("/index.html")) {
+								res = new String(res).replace("[[ENTRY1]]",String.valueOf(0 + (int)(Math.random() * 150))).getBytes();
+								}
+								}else {
+								res = API.readFile(path,true,false);
+								}
+								SendGet(s,res,type);
 						}
 			} catch (Exception e) {
 				
 			}
+		}
+	}
+	public static void SendGet(Socket s,byte[] res,String type) {
+		try {
+			System.out.println("Trying to read the file: "+path);
+			API.Network.write(new DataOutputStream(s.getOutputStream()), res, type);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	public static void translator(String i) {
