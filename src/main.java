@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +16,9 @@ public class main {
 	static int PORT = 80;
 	static String db;
 	static String DEFAULT_DOCUMENT = "index.html";
+	static String params = "";
 	static ConcurrentHashMap<String,String> content_types = new ConcurrentHashMap<String,String>();
+	static ConcurrentHashMap<String,String> param = new ConcurrentHashMap<String,String>();
 	public static void main(String[] args) {
 		try {
 			ServerSocket s = new ServerSocket(PORT);
@@ -46,7 +49,11 @@ public class main {
 								if(type.contains("text")) {
 								res = API.readFile(path,true,false);
 								if(path.equals(DEFAULT_DOCUMENT) || path.equals("/index.html")) {
-								res = new String(res).replace("[[ENTRY1]]",String.valueOf(0 + (int)(Math.random() * 150))).getBytes();
+								res = new String(res).replace("[[TIME]]",LocalDateTime.now().toString()).getBytes();
+								res = new String(res).replace("[[USER]]",param.get("user")).getBytes();
+								/*
+								 * Visit http://127.0.0.1/index.html?user=Morad to see the result
+								 */
 								}
 								}else {
 								res = API.readFile(path,true,false);
@@ -70,7 +77,10 @@ public class main {
 		requestsLines = i.split("\r\n");
         requestLine = requestsLines[0].split(" ");
         method = requestLine[0];
-        path = requestLine[1];
+        if(!requestLine[1].contains("?")) requestLine[1] += "?";
+        path = requestLine[1].substring(0,requestLine[1].indexOf("?"));
+        params = requestLine[1].substring(requestLine[1].indexOf("?")+1);
+        param = TextToHashmap.Convert(params,"&","=");
         version = requestLine[2];
         host = requestsLines[1].split(" ")[1];
         for (int h = 2; h < requestsLines.length; h++) {
