@@ -1,12 +1,10 @@
-import java.io.*;
-import java.net.Socket;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Scanner;
 
 public class API {
-		public static class Network {
+	public static class Network {
 		public static void write(DataOutputStream s, byte[] res, String content) {
 			try {
 				s.write("HTTP/1.1 200 OK\r\n".getBytes());
@@ -21,7 +19,7 @@ public class API {
 				s.write("Server: SimplyJServer\r\n".getBytes());
 				s.write(("Content-Length: " + res.length + "\r\n").getBytes());
 				s.write("Connection: close\r\n".getBytes());
-				s.write(("Content-Type: "+content+"\r\n\r\n").getBytes());
+				s.write(("Content-Type: " + content + "\r\n\r\n").getBytes());
 				s.write(res);
 				s.flush();
 				s.close();
@@ -29,32 +27,33 @@ public class API {
 				e.printStackTrace();
 			}
 		}
+
 		public static String read(DataInputStream s) {
-		    StringBuilder result = null;
+			StringBuilder result = null;
 			try {
 				result = new StringBuilder();
 				do {
-				    result.append((char) s.read());
+					result.append((char) s.read());
 				} while (s.available() > 0);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		    return result.toString();
+			return result.toString();
 		}
 	}
-	public static byte[] readFile(String filename,boolean ispublic,boolean binary) throws FileNotFoundException {
-        byte[] out = null;
-        if(ispublic) {
-        	filename = ("./public_html/"+filename);
-        }else {
-        	filename = ("./"+filename);
-        }
-        try {
+
+	public static byte[] readFile(String filename, boolean ispublic, boolean binary) throws Exception {
+		byte[] out = null;
+		if (ispublic) {
+			filename = ("./public_html/" + filename);
+		} else {
+			filename = ("./" + filename);
+		}
+		try {
 			out = Files.readAllBytes(Paths.get(filename));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-        return out;
-    }
+		return out;
+	}
 }
